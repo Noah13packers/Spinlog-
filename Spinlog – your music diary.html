@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spinlog – your music diary</title>
+<style>
+:root{--bg:#fafaf7;--fg:#161816;--muted:#7a7f7a;--card:#fff;--line:#e4e6e1;--accent:#1db954;--gold:#f5b301;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e100f;--fg:#eef0ec;--muted:#8b918b;--card:#181b19;--line:#272b28}}
+:root[data-theme="dark"]{--bg:#0e100f;--fg:#eef0ec;--muted:#8b918b;--card:#181b19;--line:#272b28}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding:12px 14px 0;border-bottom:1px solid var(--line)}
+h1{margin:0 0 8px;font-size:22px;letter-spacing:-.5px}h1 span{color:var(--accent)}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:8px 6px;font:600 14px inherit;font-family:inherit;white-space:nowrap}
+nav button.on{color:var(--fg);border-color:var(--accent)}
+main{padding:14px;max-width:900px;margin:0 auto}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit;margin-bottom:10px}
+.bar{display:flex;gap:8px}.bar input{margin:0}
+.btn{background:var(--accent);color:#04210e;border:0;border-radius:10px;padding:10px 14px;font:700 14px inherit;font-family:inherit;white-space:nowrap;text-decoration:none;display:inline-block;text-align:center}
+.btn.g{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:14px}
+.card{cursor:pointer}.card .t{font-weight:600;margin-top:6px;font-size:13px;line-height:1.25}.card .a{color:var(--muted);font-size:12px}
+.cov{aspect-ratio:1;border-radius:8px;display:flex;align-items:flex-end;padding:8px;color:#fff;font-weight:800;font-size:22px;text-shadow:0 1px 6px #0006;position:relative;overflow:hidden}
+.cov small{position:absolute;top:6px;right:8px;font-size:15px}
+.st{letter-spacing:1px;font-size:14px;white-space:nowrap}.st i{font-style:normal;color:var(--line)}.st i.f{color:var(--gold)}
+.st i.h{background:linear-gradient(90deg,var(--gold) 50%,var(--line) 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}.row .cov{width:64px;flex:none;font-size:14px;padding:5px}
+.row p{margin:4px 0 0;color:var(--muted);font-size:13px}
+#sheet{position:fixed;inset:0;background:#000a;z-index:20;display:none;align-items:flex-end;justify-content:center}
+#sheet.on{display:flex}
+.pane{background:var(--bg);width:100%;max-width:520px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.top{display:flex;gap:12px;margin-bottom:12px}.top .cov{width:96px;flex:none}.top h2{margin:0;font-size:19px}
+.big{font-size:34px;cursor:pointer;user-select:none;margin:6px 0 10px;display:block}
+.stat{display:flex;gap:10px;margin:14px 0}.stat div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.stat b{font-size:24px;display:block}
+.hb{display:flex;align-items:flex-end;gap:5px;height:90px;margin:8px 0 4px}.hb div{flex:1;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.lbl{display:flex;gap:5px;color:var(--muted);font-size:11px}.lbl span{flex:1;text-align:center}
+.empty{color:var(--muted);text-align:center;padding:40px 10px}.muted{color:var(--muted);font-size:12px}
+</style></head><body>
+<header><h1>Spin<span>log</span></h1>
+<nav id="nav"></nav></header>
+<main id="m"></main>
+<div id="sheet"><div class="pane" id="pane"></div></div>
+<script>
+const D=[["Kind of Blue","Miles Davis",1959,"Jazz"],["OK Computer","Radiohead",1997,"Alt Rock"],["In Rainbows","Radiohead",2007,"Alt Rock"],["To Pimp a Butterfly","Kendrick Lamar",2015,"Hip-Hop"],["good kid, m.A.A.d city","Kendrick Lamar",2012,"Hip-Hop"],["Illmatic","Nas",1994,"Hip-Hop"],["Rumours","Fleetwood Mac",1977,"Rock"],["Abbey Road","The Beatles",1969,"Rock"],["The Dark Side of the Moon","Pink Floyd",1973,"Prog Rock"],["Is This It","The Strokes",2001,"Indie Rock"],["Blonde","Frank Ocean",2016,"R&B"],["Channel Orange","Frank Ocean",2012,"R&B"],["Lemonade","Beyoncé",2016,"R&B"],["Back to Black","Amy Winehouse",2006,"Soul"],["Thriller","Michael Jackson",1982,"Pop"],["Random Access Memories","Daft Punk",2013,"Electronic"],["Mezzanine","Massive Attack",1998,"Trip Hop"],["Homogenic","Björk",1997,"Art Pop"],["Currents","Tame Impala",2015,"Psychedelic"],["Punisher","Phoebe Bridgers",2020,"Indie Folk"],["folklore","Taylor Swift",2020,"Indie Folk"],["Titanic Rising","Weyes Blood",2019,"Baroque Pop"],["IGOR","Tyler, the Creator",2019,"Hip-Hop"],["Blue","Joni Mitchell",1971,"Folk"]].map(a=>({id:(a[0]+a[1]).toLowerCase().replace(/[^a-z0-9]/g,''),t:a[0],a:a[1],y:a[2],g:a[3]}));
+let S;const init=()=>({custom:[],logs:{},later:[]});
+try{S=JSON.parse(localStorage.getItem('spinlog'))||init()}catch(e){S=init()}
+const save=()=>{try{localStorage.setItem('spinlog',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const all=()=>D.concat(S.custom);const C={};let R=[],err='',tm,tok=0;
+const find=id=>all().find(a=>a.id===id)||C[id];
+const ensure=id=>{if(!all().find(a=>a.id===id)&&C[id])S.custom.push(C[id])};
+function jp(u){return new Promise((res,rej)=>{const cb='cb'+Date.now(),s=document.createElement('script');window[cb]=d=>{res(d);s.remove();delete window[cb]};s.onerror=()=>{rej();s.remove()};s.src=u+'&callback='+cb;document.body.appendChild(s)})}
+function rf(){const e=$('q');if(e){e.focus();e.setSelectionRange(q.length,q.length)}}
+function srch(){return;clearTimeout(tm);if(q.trim().length<2){R=[];err='';return}const my=++tok;
+ tm=setTimeout(async()=>{try{const j=await jp('https://itunes.apple.com/search?media=music&entity=album&limit=40&term='+encodeURIComponent(q));if(my!==tok)return;
+ R=j.results.filter(x=>x.collectionName).map(x=>({id:'i'+x.collectionId,t:x.collectionName.replace(/ - (Single|EP)$/,''),a:x.artistName,y:(x.releaseDate||'').slice(0,4),g:x.primaryGenreName,img:(x.artworkUrl100||'').replace('100x100','400x400'),am:x.collectionViewUrl}));
+ R.forEach(a=>C[a.id]=a);err=R.length?'':'No results.'}catch(e){if(my!==tok)return;R=[];err='Live search unreachable here; showing local albums.'}render();rf()},350)}
+let tab='discover',q='';
+const TABS=[['discover','Discover'],['diary','Diary'],['later','Listen later'],['stats','Stats']];
+function cov(a){let h=0;for(const c of a.t+a.a)h=(h*31+c.charCodeAt(0))%360;
+ const l=S.logs[a.id];
+ if(a.img)return `<div class="cov" style="background:url('${esc(a.img)}') center/cover,#333">${l&&l.liked?'<small>♥</small>':''}</div>`;
+ return `<div class="cov" style="background:linear-gradient(135deg,hsl(${h},60%,46%),hsl(${(h+70)%360},65%,28%))">${esc(a.t.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase())}${l&&l.liked?'<small>♥</small>':''}</div>`}
+function stars(r){let s='';for(let i=1;i<=5;i++)s+=`<i class="${r>=i?'f':r>=i-.5?'h':''}">★</i>`;return `<span class="st">${s}</span>`}
+function link(a){return a.url||'https://open.spotify.com/search/'+encodeURIComponent(a.t+' '+a.a)}
+function card(a){const l=S.logs[a.id];return `<div class="card" onclick="openA('${a.id}')">${cov(a)}<div class="t">${esc(a.t)}</div><div class="a">${esc(a.a)} · ${a.y}</div>${l&&l.r?stars(l.r):''}</div>`}
+function render(){
+ $('nav').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
+ let h='';
+ if(tab==='discover'){
+  const useR=q.trim().length>=2&&R.length,f=useR?R:all().filter(a=>(a.t+a.a+a.g).toLowerCase().includes(q.toLowerCase()));
+  h=`<div class="bar"><input id="q" placeholder="Search albums, artists, genres" value="${esc(q)}" oninput="q=this.value;render();rf();srch()"><button class="btn" onclick="addForm()">+ Add</button></div>
+  <p class="muted">${useR?'Live results from the Apple Music / iTunes catalog':'Classics – tap + Add to log any album'}</p>
+  <div class="grid">${f.map(card).join('')}</div>${f.length?'':'<div class="empty">No match.</div>'}`}
+ else if(tab==='diary'){
+  const e=Object.entries(S.logs).filter(([k,l])=>find(k)&&(l.r||l.review||l.date)).sort((a,b)=>(b[1].date||'').localeCompare(a[1].date||''));
+  h=e.length?e.map(([k,l])=>{const a=find(k);return `<div class="row" onclick="openA('${k}')">${cov(a)}<div><b>${esc(a.t)}</b> <span class="muted">${esc(a.a)}</span><br>${l.r?stars(l.r):''} <span class="muted">${esc(l.date||'')}</span>${l.review?`<p>${esc(l.review.slice(0,140))}</p>`:''}</div></div>`}).join(''):'<div class="empty">Your diary is empty. Open an album in Discover and log your first listen.</div>'}
+ else if(tab==='later'){
+  const f=S.later.map(find).filter(Boolean);
+  h=f.length?`<div class="grid">${f.map(card).join('')}</div>`:'<div class="empty">Nothing queued. Open an album and tap “Listen later”.</div>'}
+ else{
+  const L=Object.entries(S.logs).filter(([k,l])=>find(k)&&l.r),n=L.length,avg=n?(L.reduce((s,x)=>s+x[1].r,0)/n):0;
+  const hist=[1,2,3,4,5].map(i=>L.filter(x=>Math.ceil(x[1].r)===i).length),mx=Math.max(1,...hist);
+  const g={};L.forEach(x=>{const k=find(x[0]).g;g[k]=(g[k]||0)+1});
+  const tg=Object.entries(g).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  h=`<div class="stat"><div><b>${n}</b>rated</div><div><b>${n?avg.toFixed(1):'–'}</b>avg ★</div><div><b>${Object.values(S.logs).filter(l=>l.liked).length}</b>liked</div></div>
+  <b>Ratings</b><div class="hb">${hist.map(v=>`<div style="height:${v/mx*100}%"></div>`).join('')}</div><div class="lbl">${[1,2,3,4,5].map(i=>`<span>${i}★</span>`).join('')}</div>
+  <p><b>Top genres</b></p>${tg.length?tg.map(x=>`<div>${esc(x[0])} <span class="muted">× ${x[1]}</span></div>`).join(''):'<div class="muted">Rate some albums to see this.</div>'}`}
+ $('m').innerHTML=h}
+let cur=null,draft=null;
+function openA(id){cur=id;const l=S.logs[id]||{};draft={r:l.r||0,liked:!!l.liked,review:l.review||'',date:l.date||new Date().toISOString().slice(0,10)};sheet()}
+function sheet(){const a=find(cur),d=draft,lat=S.later.includes(cur);
+ $('pane').innerHTML=`<div class="top">${cov(a)}<div><h2>${esc(a.t)}</h2><div class="muted">${esc(a.a)} · ${a.y} · ${esc(a.g)}</div><a class="btn g" style="margin-top:10px;padding:7px 11px" href="${esc(link(a))}" target="_blank" rel="noopener">▶ Spotify</a>${a.am?` <a class="btn g" style="margin-top:10px;padding:7px 11px" href="${esc(a.am)}" target="_blank" rel="noopener"> Apple Music</a>`:''}</div></div>
+ <span class="big" onclick="rate(event)">${stars(d.r)}</span>
+ <textarea id="rv" rows="4" placeholder="Add a review…" oninput="draft.review=this.value">${esc(d.review)}</textarea>
+ <input type="date" value="${esc(d.date)}" onchange="draft.date=this.value">
+ <div class="bar"><button class="btn g" onclick="draft.liked=!draft.liked;sheet()">${d.liked?'♥ Liked':'♡ Like'}</button><button class="btn g" onclick="toggleLater()">${lat?'✓ In queue':'+ Listen later'}</button></div>
+ <div class="bar" style="margin-top:10px"><button class="btn" style="flex:1" onclick="commit()">Save to diary</button><button class="btn g" onclick="closeS()">Close</button></div>
+ ${S.logs[cur]||a.custom?`<p style="text-align:center"><a href="#" class="muted" onclick="del();return false">Remove ${a.custom?'album':'log'}</a></p>`:''}`}
+function rate(e){const el=e.target.closest('i');if(!el)return;const st=[...el.parentNode.children],i=st.indexOf(el),r=el.getBoundingClientRect(),half=e.clientX-r.left<r.width/2;const v=i+(half?.5:1);draft.r=draft.r===v?0:v;draft.review=$('rv').value;sheet()}
+function toggleLater(){ensure(cur);draft.review=$('rv').value;S.later=S.later.includes(cur)?S.later.filter(x=>x!==cur):[...S.later,cur];save();sheet()}
+function commit(){ensure(cur);draft.review=$('rv').value;S.logs[cur]={...draft};S.later=S.later.filter(x=>x!==cur);save();closeS();tab='diary';render()}
+function del(){delete S.logs[cur];S.custom=S.custom.filter(a=>a.id!==cur);S.later=S.later.filter(x=>x!==cur);save();closeS();render()}
+function closeS(){$('sheet').classList.remove('on');render()}
+$('sheet').onclick=e=>{if(e.target.id==='sheet')closeS()};
+function addForm(){$('pane').innerHTML=`<h2 style="margin-top:0">Add an album</h2><p class="muted">Find it on Spotify, then paste the title, artist and (optionally) the share link.</p>
+ <input id="n1" placeholder="Album title"><input id="n2" placeholder="Artist"><div class="bar"><input id="n3" type="number" placeholder="Year"><input id="n4" placeholder="Genre"></div><input id="n5" placeholder="Spotify album link (optional)">
+ <div class="bar"><button class="btn" style="flex:1" onclick="addA()">Add album</button><button class="btn g" onclick="closeS()">Cancel</button></div>`;$('sheet').classList.add('on')}
+function addA(){const t=$('n1').value.trim(),a=$('n2').value.trim();if(!t||!a)return;const u=$('n5').value.trim();
+ const o={id:'c'+Date.now(),t,a,y:$('n3').value||'—',g:$('n4').value.trim()||'Other',custom:1};if(/^https:\/\/open\.spotify\.com\//.test(u))o.url=u;
+ S.custom.push(o);save();draft=null;cur=o.id;openA(o.id);}
+const _o=openA;openA=function(id){_o(id);$('sheet').classList.add('on')};
+render();
+</script></body></html>
